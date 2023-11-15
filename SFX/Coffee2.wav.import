@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/Coffee2.wav-17d1e39308e4c4a8c28a1c6c58008f5a.sample"
+
+[deps]
+
+source_file="res://SFX/Coffee2.wav"
+dest_files=[ "res://.import/Coffee2.wav-17d1e39308e4c4a8c28a1c6c58008f5a.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

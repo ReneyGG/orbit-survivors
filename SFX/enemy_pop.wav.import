@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/enemy_pop.wav-fdbbd36ab6a0a05419d6c2a1cfc6e313.sample"
+
+[deps]
+
+source_file="res://SFX/enemy_pop.wav"
+dest_files=[ "res://.import/enemy_pop.wav-fdbbd36ab6a0a05419d6c2a1cfc6e313.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

@@ -1,0 +1,467 @@
+[gd_scene load_steps=24 format=2]
+
+[ext_resource path="res://Scenes/Player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scenes/Spawner.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scenes/Heart.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Scripts/Main.gd" type="Script" id=4]
+[ext_resource path="res://Scenes/Meteor.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Art/bar.png" type="Texture" id=6]
+[ext_resource path="res://Scripts/Camera2D.gd" type="Script" id=7]
+[ext_resource path="res://press-start.k.ttf" type="DynamicFontData" id=8]
+[ext_resource path="res://Art/restart.png" type="Texture" id=9]
+[ext_resource path="res://SFX/glitch_004.wav" type="AudioStream" id=10]
+[ext_resource path="res://Art/upgrade.png" type="Texture" id=11]
+[ext_resource path="res://SFX/African2.wav" type="AudioStream" id=12]
+[ext_resource path="res://SFX/African3.wav" type="AudioStream" id=13]
+[ext_resource path="res://SFX/switch.wav" type="AudioStream" id=14]
+[ext_resource path="res://Scenes/Cursor.tscn" type="PackedScene" id=15]
+
+[sub_resource type="DynamicFont" id=1]
+size = 8
+font_data = ExtResource( 8 )
+
+[sub_resource type="DynamicFont" id=2]
+font_data = ExtResource( 8 )
+
+[sub_resource type="DynamicFont" id=3]
+size = 8
+font_data = ExtResource( 8 )
+
+[sub_resource type="DynamicFont" id=4]
+size = 32
+font_data = ExtResource( 8 )
+
+[sub_resource type="Shader" id=5]
+code = "shader_type canvas_item;
+
+uniform vec4 background_color : hint_color;
+uniform vec4 shadow_color : hint_color;
+// Currently pixels always in application size, so zooming in further wouldn't increase the size of the dropdown
+// but changing that would also be relatively trivial
+uniform vec2 offset_in_pixels;
+
+void fragment() {
+	
+	// Read screen texture
+	vec4 current_color = textureLod(SCREEN_TEXTURE, SCREEN_UV, 0.0);
+	
+	// Check if the current color is our background color
+	if (length(current_color - background_color) < 0.01) {
+		
+		vec4 offset_color = textureLod(SCREEN_TEXTURE, SCREEN_UV - offset_in_pixels * SCREEN_PIXEL_SIZE, 0.0);
+		
+		// Check if at our offset position we have a color which is not the background (meaning here we need a shadow actually)
+		if (length(offset_color - background_color) > 0.01) {
+			// If so set it to our shadow color
+			current_color = shadow_color;
+		}
+	}
+	
+	COLOR = current_color;
+}"
+
+[sub_resource type="ShaderMaterial" id=6]
+shader = SubResource( 5 )
+shader_param/background_color = Color( 0.301961, 0.298039, 0.490196, 1 )
+shader_param/shadow_color = Color( 0.211765, 0.188235, 0.384314, 1 )
+shader_param/offset_in_pixels = Vector2( 8, -8 )
+
+[sub_resource type="Animation" id=7]
+length = 0.9
+step = 0.01
+tracks/0/type = "value"
+tracks/0/path = NodePath("Countdown:text")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.3, 0.6 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 1,
+"values": [ "3", "2", "1" ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Countdown:rect_scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 0.29, 0.3, 0.59, 0.6, 0.89 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 2, 2 ), Vector2( 1, 1 ), Vector2( 2, 2 ), Vector2( 1, 1 ), Vector2( 2, 2 ), Vector2( 1, 1 ) ]
+}
+tracks/2/type = "value"
+tracks/2/path = NodePath("Countdown:visible")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/keys = {
+"times": PoolRealArray( 0, 0.9 ),
+"transitions": PoolRealArray( 1, 1 ),
+"update": 1,
+"values": [ true, false ]
+}
+tracks/3/type = "method"
+tracks/3/path = NodePath(".")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/keys = {
+"times": PoolRealArray( 0.9 ),
+"transitions": PoolRealArray( 1 ),
+"values": [ {
+"args": [  ],
+"method": "unpause"
+} ]
+}
+tracks/4/type = "audio"
+tracks/4/path = NodePath("CountAudio")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/keys = {
+"clips": [ {
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource( 14 )
+}, {
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource( 14 )
+}, {
+"end_offset": 0.0,
+"start_offset": 0.0,
+"stream": ExtResource( 14 )
+} ],
+"times": PoolRealArray( 0, 0.3, 0.6 )
+}
+
+[sub_resource type="Animation" id=8]
+length = 0.12
+step = 0.02
+tracks/0/type = "value"
+tracks/0/path = NodePath("Score:rect_scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 0.06, 0.12 ),
+"transitions": PoolRealArray( 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 1, 1 ), Vector2( 1.4, 1.4 ), Vector2( 1, 1 ) ]
+}
+
+[node name="Main" type="Node2D"]
+script = ExtResource( 4 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_left = -16.0
+margin_top = -16.0
+margin_right = 336.0
+margin_bottom = 256.0
+color = Color( 0.301961, 0.298039, 0.490196, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Player" parent="." instance=ExtResource( 1 )]
+position = Vector2( 241, 98 )
+
+[node name="Meteor" parent="Player" instance=ExtResource( 5 )]
+
+[node name="Meteor2" parent="Player" instance=ExtResource( 5 )]
+rotation = 2.0944
+
+[node name="Meteor3" parent="Player" instance=ExtResource( 5 )]
+rotation = -2.0944
+
+[node name="Heart1" parent="." instance=ExtResource( 3 )]
+position = Vector2( 10, 10.6 )
+scale = Vector2( 1.2, 1.2 )
+frame = 1
+
+[node name="Heart2" parent="." instance=ExtResource( 3 )]
+position = Vector2( 27.2083, 10.6 )
+scale = Vector2( 1.2, 1.2 )
+frame = 1
+
+[node name="Heart3" parent="." instance=ExtResource( 3 )]
+position = Vector2( 44.2083, 10.6 )
+scale = Vector2( 1.2, 1.2 )
+
+[node name="Heart4" parent="." instance=ExtResource( 3 )]
+position = Vector2( 61.2083, 10.6 )
+scale = Vector2( 1.2, 1.2 )
+
+[node name="Heart5" parent="." instance=ExtResource( 3 )]
+position = Vector2( 78.2083, 10.6 )
+scale = Vector2( 1.2, 1.2 )
+
+[node name="Spawner" parent="." instance=ExtResource( 2 )]
+position = Vector2( 160, -20 )
+
+[node name="Spawner2" parent="." instance=ExtResource( 2 )]
+position = Vector2( 160, 260 )
+delay = 0.3
+
+[node name="Spawner3" parent="." instance=ExtResource( 2 )]
+position = Vector2( -20, 112 )
+lock_y = false
+delay = 0.6
+
+[node name="Spawner4" parent="." instance=ExtResource( 2 )]
+position = Vector2( 340, 112 )
+lock_y = false
+delay = 0.9
+
+[node name="Powers" type="Node2D" parent="."]
+
+[node name="TextureProgress" type="TextureProgress" parent="."]
+margin_left = 184.0
+margin_top = 26.0
+margin_right = 194.0
+margin_bottom = 74.0
+rect_rotation = 90.0
+max_value = 20.0
+value = 7.0
+texture_under = ExtResource( 6 )
+texture_progress = ExtResource( 6 )
+fill_mode = 3
+tint_progress = Color( 0.976471, 0.580392, 0.0901961, 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="RichTextLabel" parent="TextureProgress"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = 3.00001
+margin_top = 60.0
+margin_right = 123.0
+margin_bottom = 73.0
+rect_rotation = -90.0
+rect_clip_content = false
+custom_fonts/normal_font = SubResource( 1 )
+custom_colors/default_color = Color( 0.976471, 0.580392, 0.0901961, 1 )
+bbcode_enabled = true
+bbcode_text = "[center][wave]Max Upgrades!"
+text = "Max Upgrades!"
+scroll_active = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Score" type="Label" parent="."]
+margin_left = 80.0
+margin_right = 240.0
+margin_bottom = 32.0
+rect_pivot_offset = Vector2( 80, 16 )
+custom_fonts/font = SubResource( 2 )
+text = "123456890"
+align = 1
+valign = 1
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="RestartButton" type="TextureButton" parent="."]
+pause_mode = 2
+margin_left = 140.0
+margin_top = 92.0
+margin_right = 180.0
+margin_bottom = 132.0
+rect_pivot_offset = Vector2( 20, 20 )
+texture_normal = ExtResource( 9 )
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Upgrade1" type="Label" parent="."]
+pause_mode = 2
+margin_left = 18.0
+margin_top = 212.0
+margin_right = 99.0
+margin_bottom = 231.0
+rect_pivot_offset = Vector2( 37, 4 )
+custom_fonts/font = SubResource( 3 )
+custom_colors/font_color = Color( 0.976471, 0.580392, 0.0901961, 1 )
+text = "Bigger Orb"
+align = 1
+valign = 1
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Upgrade1Button" type="TextureButton" parent="Upgrade1"]
+anchor_left = -0.028
+anchor_top = -0.125
+anchor_right = 1.0
+anchor_bottom = 1.125
+margin_left = 0.016
+expand = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="UpgradeBg" type="TextureRect" parent="Upgrade1"]
+show_behind_parent = true
+anchor_left = -0.042
+anchor_top = -0.125
+anchor_right = 1.014
+anchor_bottom = 1.125
+margin_left = 0.0240002
+margin_right = -0.00800323
+mouse_filter = 2
+texture = ExtResource( 11 )
+expand = true
+
+[node name="Upgrade2" type="Label" parent="."]
+pause_mode = 2
+margin_left = 119.0
+margin_top = 212.0
+margin_right = 201.0
+margin_bottom = 231.0
+rect_pivot_offset = Vector2( 37, 4 )
+custom_fonts/font = SubResource( 3 )
+custom_colors/font_color = Color( 0.976471, 0.580392, 0.0901961, 1 )
+text = "Extra Orb"
+align = 1
+valign = 1
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Upgrade2Button" type="TextureButton" parent="Upgrade2"]
+anchor_left = -0.028
+anchor_top = -0.125
+anchor_right = 1.0
+anchor_bottom = 1.125
+margin_left = 0.016
+expand = true
+
+[node name="UpgradeBg" type="TextureRect" parent="Upgrade2"]
+show_behind_parent = true
+anchor_left = -0.042
+anchor_top = -0.125
+anchor_right = 1.014
+anchor_bottom = 1.125
+margin_left = 0.0240002
+margin_right = -0.00800323
+mouse_filter = 2
+texture = ExtResource( 11 )
+expand = true
+
+[node name="Upgrade3" type="Label" parent="."]
+pause_mode = 2
+margin_left = 222.0
+margin_top = 212.0
+margin_right = 303.0
+margin_bottom = 231.0
+rect_pivot_offset = Vector2( 37, 4 )
+custom_fonts/font = SubResource( 3 )
+custom_colors/font_color = Color( 0.976471, 0.580392, 0.0901961, 1 )
+text = "Extra Orb"
+align = 1
+valign = 1
+autowrap = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Upgrade3Button" type="TextureButton" parent="Upgrade3"]
+anchor_left = -0.028
+anchor_top = -0.125
+anchor_right = 1.0
+anchor_bottom = 1.125
+margin_left = 0.016
+expand = true
+
+[node name="UpgradeBg" type="TextureRect" parent="Upgrade3"]
+show_behind_parent = true
+anchor_left = -0.042
+anchor_top = -0.125
+anchor_right = 1.014
+anchor_bottom = 1.125
+margin_left = 0.0240002
+margin_right = -0.00800323
+mouse_filter = 2
+texture = ExtResource( 11 )
+expand = true
+
+[node name="Countdown" type="Label" parent="."]
+pause_mode = 2
+visible = false
+margin_right = 320.0
+margin_bottom = 240.0
+rect_pivot_offset = Vector2( 160, 120 )
+custom_fonts/font = SubResource( 4 )
+text = "1"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Cursor" parent="." instance=ExtResource( 15 )]
+
+[node name="ShadowShader" type="ColorRect" parent="."]
+material = SubResource( 6 )
+margin_right = 320.0
+margin_bottom = 240.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2( 160, 120 )
+current = true
+script = ExtResource( 7 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+pause_mode = 2
+anims/count = SubResource( 7 )
+anims/score = SubResource( 8 )
+
+[node name="Click" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 10 )
+volume_db = -6.0
+
+[node name="Yay" type="AudioStreamPlayer" parent="."]
+pause_mode = 2
+stream = ExtResource( 12 )
+volume_db = -6.0
+
+[node name="Aya" type="AudioStreamPlayer" parent="."]
+stream = ExtResource( 13 )
+volume_db = -6.0
+
+[node name="CountAudio" type="AudioStreamPlayer" parent="."]
+pause_mode = 2
+stream = ExtResource( 14 )
+
+[node name="Tween" type="Tween" parent="."]
+pause_mode = 2
+[connection signal="pressed" from="RestartButton" to="." method="_on_RestartButton_pressed"]
+[connection signal="mouse_entered" from="Upgrade1/Upgrade1Button" to="." method="_on_Upgrade1Button_mouse_entered"]
+[connection signal="mouse_exited" from="Upgrade1/Upgrade1Button" to="." method="_on_Upgrade1Button_mouse_exited"]
+[connection signal="pressed" from="Upgrade1/Upgrade1Button" to="." method="_on_Upgrade1Button_pressed"]
+[connection signal="mouse_entered" from="Upgrade2/Upgrade2Button" to="." method="_on_Upgrade2Button_mouse_entered"]
+[connection signal="mouse_exited" from="Upgrade2/Upgrade2Button" to="." method="_on_Upgrade2Button_mouse_exited"]
+[connection signal="pressed" from="Upgrade2/Upgrade2Button" to="." method="_on_Upgrade2Button_pressed"]
+[connection signal="mouse_entered" from="Upgrade3/Upgrade3Button" to="." method="_on_Upgrade3Button_mouse_entered"]
+[connection signal="mouse_exited" from="Upgrade3/Upgrade3Button" to="." method="_on_Upgrade3Button_mouse_exited"]
+[connection signal="pressed" from="Upgrade3/Upgrade3Button" to="." method="_on_Upgrade3Button_pressed"]
